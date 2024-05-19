@@ -1,9 +1,10 @@
-import { Module } from "@nestjs/common";
-import { PrismaModule } from "../prisma/prisma.module";
+import { Module } from '@nestjs/common';
+import { PrismaModule } from '../prisma/prisma.module';
+import { PickingRepository } from "./repository/picking.repository";
 
 @Module({
   imports: [PrismaModule],
   controllers: [],
-  providers: [],
+  providers: [PickingRepository],
 })
 export class PickingModule {}

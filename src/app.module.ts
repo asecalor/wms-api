@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { WarehouseModule } from "./warehouse/warehouse.module";
-import { PickingModule } from "./picking/picking.module";
+import { WarehouseModule } from './warehouse/warehouse.module';
+import { PickingModule } from './picking/picking.module';
 
 @Module({
-  imports: [WarehouseModule,PickingModule],
+  imports: [WarehouseModule, PickingModule],
   controllers: [],
   providers: [],
 })

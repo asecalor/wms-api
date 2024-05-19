@@ -8,9 +8,16 @@ datasource db {
 }
 
 model OrderExecution {
-  id         Int     @id @default(autoincrement())
-  orderId    Int     @unique
-  canDeliver Boolean @default(false)
+  id         Int       @id @default(autoincrement())
+  orderId    Int       @unique
+  canDeliver Boolean   @default(false)
+  picking    Picking[]
+}
+
+model OrderRejection {
+  id        Int      @id @default(autoincrement())
+  orderId   Int      @unique
+  createdAt DateTime @default(now())
 }
 
 model WareHouse {
@@ -21,18 +28,22 @@ model WareHouse {
 }
 
 model ProductWareHouse {
+  id          Int       @id @default(autoincrement())
   wareHouseId Int
   productId   Int
   stock       Int
   WareHouse   WareHouse @relation(fields: [wareHouseId], references: [id])
+  picking     Picking[]
 
-  @@id([wareHouseId, productId])
+  @@unique([wareHouseId, productId])
 }
 
 model Picking {
-  id                 Int     @id @default(autoincrement())
+  id                 Int              @id @default(autoincrement())
   orderExecutionId   Int
   productWareHouseId Int
   quantity           Int // Items of the order
-  picked             Boolean @default(false)
+  picked             Boolean          @default(false)
+  ProductWareHouse   ProductWareHouse @relation(fields: [productWareHouseId], references: [id])
+  OrderExecution     OrderExecution   @relation(fields: [orderExecutionId], references: [id])
 }
