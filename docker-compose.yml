@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  database:
+    container_name: "wms-db"
+    image: postgres:16-alpine
+    restart: always
+    ports:
+      - '5435:5432'
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: "CMD-SHELL pg_isready -d $$POSTGRES_DB"
+      interval: 1s
+      timeout: 5s
+      retries: 10
+volumes:
+  db-data:

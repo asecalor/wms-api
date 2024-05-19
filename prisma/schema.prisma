@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model OrderExecution {
+  id         Int     @id @default(autoincrement())
+  orderId    Int     @unique
+  canDeliver Boolean @default(false)
+}
+
+model WareHouse {
+  id         Int                @id @default(autoincrement())
+  providerId Int
+  address    String
+  products   ProductWareHouse[]
+}
+
+model ProductWareHouse {
+  wareHouseId Int
+  productId   Int
+  stock       Int
+  WareHouse   WareHouse @relation(fields: [wareHouseId], references: [id])
+
+  @@id([wareHouseId, productId])
+}
+
+model Picking {
+  id                 Int     @id @default(autoincrement())
+  orderExecutionId   Int
+  productWareHouseId Int
+  quantity           Int // Items of the order
+  picked             Boolean @default(false)
+}
