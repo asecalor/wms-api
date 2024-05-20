@@ -29,55 +29,52 @@ export class WarehouseRepository {
           wareHouseProduct.wareHouseId,
           wareHouseProduct.productId,
           wareHouseProduct.stock,
-        ))
+        ),
+    );
   }
-  async existsOrderExecuted(orderId: number): Promise<boolean>{
-    const order= await this.db.orderExecution.findUnique(
-      {
-        where:{
-          orderId
-        }
-      }
-    )
-    return !order
+  async existsOrderExecuted(orderId: number): Promise<boolean> {
+    const order = await this.db.orderExecution.findUnique({
+      where: {
+        orderId,
+      },
+    });
+    return !order;
   }
 
-  async existsOrderRejected(orderId: number) : Promise<boolean>{
-    const order= await this.db.orderRejection.findUnique(
-      {
-        where:{
-          orderId
-        }
-      }
-    )
-    return !order
+  async existsOrderRejected(orderId: number): Promise<boolean> {
+    const order = await this.db.orderRejection.findUnique({
+      where: {
+        orderId,
+      },
+    });
+    return !order;
   }
 
   async createOrderExecution(orderId: number) {
     return this.db.orderExecution.create({
-      data:{
-        orderId
-      }
-    })
-  }
-  async updateStock(productWareHouseId: number,quantity: number){
-    return this.db.productWareHouse.update({
-      where:{
-        id: productWareHouseId
+      data: {
+        orderId,
       },
-      data:{
+    });
+  }
+  async updateStock(productWareHouseId: number, quantity: number) {
+    return this.db.productWareHouse.update({
+      where: {
+        id: productWareHouseId,
+      },
+      data: {
         stock: {
-          decrement: quantity
-        }
-      }
-    })
+          decrement: quantity,
+        },
+      },
+    });
   }
 
-  async createOrderRejection(orderId: number){
+  async createOrderRejection(orderId: number) {
     return this.db.orderRejection.create({
-      data:{
-        orderId
-      }
-    })
+      data: {
+        orderId,
+      },
+    });
   }
 }
