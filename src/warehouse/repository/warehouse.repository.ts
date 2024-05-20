@@ -38,7 +38,7 @@ export class WarehouseRepository {
         orderId,
       },
     });
-    return !order;
+    return !!order;
   }
 
   async existsOrderRejected(orderId: number): Promise<boolean> {
@@ -47,7 +47,7 @@ export class WarehouseRepository {
         orderId,
       },
     });
-    return !order;
+    return !!order;
   }
 
   async createOrderExecution(orderId: number) {
