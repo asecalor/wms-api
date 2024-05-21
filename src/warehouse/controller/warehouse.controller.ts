@@ -31,7 +31,7 @@ export class WarehouseController {
     return this.warehouseService.updateOrderStatus(clientId, orderStatus);
   }
 
-  @Get('order/not-delivered')
+  @Get('not-delivered-orders')
   async getNotDeliveredOrders() {
     return this.warehouseService.getUndeliverableOrders()
   }
