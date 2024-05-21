@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   //Port 3000 is used in control tower
-  app.enableCors()
+  app.enableCors();
   await app.listen(3001);
 }
 bootstrap();

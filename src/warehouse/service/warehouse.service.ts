@@ -4,6 +4,9 @@ import { OrderResponseDto } from '../dto/order-reponse.dto';
 import { PickingRepository } from '../../picking/repository/picking.repository';
 import { ProductToPickDto } from '../dto/product-to-pick.dto';
 import { ProductWarehouseDto } from '../dto/product-warehouse.dto';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { OrderUpdateDto } from '../dto/order-update.dto';
 
 @Injectable()
 export class WarehouseService {
@@ -12,6 +15,7 @@ export class WarehouseService {
     private readonly warehouseRepository: WarehouseRepository,
     @Inject(PickingRepository)
     private readonly pickingRepository: PickingRepository,
+    private readonly httpService: HttpService,
   ) {}
 
   async handleOrder(order: OrderResponseDto) {
@@ -26,6 +30,7 @@ export class WarehouseService {
       orderExecution.id,
       productsToPick,
     );
+    await this.updateOrderStatus(order.orderId, new OrderUpdateDto('ACCEPTED'));
   }
 
   private async checkOrderExists(order: OrderResponseDto) {
@@ -78,5 +83,14 @@ export class WarehouseService {
 
   private async createOrderExecution(order: OrderResponseDto) {
     return await this.warehouseRepository.createOrderExecution(order.orderId);
+  }
+
+  async updateOrderStatus(orderId: number, orderUpdate: OrderUpdateDto) {
+    await firstValueFrom(
+      this.httpService.put(
+        `http://localhost:3000/order/${orderId}`,
+        orderUpdate,
+      ),
+    );
   }
 }
