@@ -19,4 +19,26 @@ export class PickingRepository {
       })),
     });
   }
+
+  async updateToPickedProduct(orderExecutionId: number, productWareHouseId: number) :Promise<boolean> {
+    const picking = await this.db.picking.findFirst({
+      where: {
+        orderExecutionId: orderExecutionId,
+        productWareHouseId: productWareHouseId,
+      },
+    });
+    if (!picking) {
+      return false
+    }
+
+    await this.db.picking.update({
+      where: {
+        id: picking.id,  // Usamos el ID único del registro encontrado
+      },
+      data: {
+        picked: true,
+      },
+    });
+    return true
+  }
 }
