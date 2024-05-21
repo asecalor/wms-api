@@ -1,6 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ProductWarehouseDto } from '../dto/product-warehouse.dto';
+import { Inject, Injectable } from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { ProductWarehouseDto } from "../dto/product-warehouse.dto";
 
 @Injectable()
 export class WarehouseRepository {
@@ -74,6 +74,26 @@ export class WarehouseRepository {
     return this.db.orderRejection.create({
       data: {
         orderId,
+      },
+    });
+  }
+
+  async getUndeliverableOrders() {
+    //Finds all orders that can't be delivered
+    return this.db.orderExecution.findMany({
+      where: {
+        canDeliver: false,
+      },
+      select: {
+        id: true,
+        orderId: true,
+        picking: {
+          select: {
+            productWareHouseId: true,
+            quantity: true,
+            picked: true,
+          },
+        },
       },
     });
   }

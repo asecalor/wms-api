@@ -1,12 +1,12 @@
 import {
   Body,
-  Controller,
+  Controller, Get,
   Inject,
   Param,
   ParseIntPipe,
   Post,
-  Put,
-} from '@nestjs/common';
+  Put
+} from "@nestjs/common";
 import { OrderResponseDto } from '../dto/order-reponse.dto';
 import { WarehouseService } from '../service/warehouse.service';
 import { OrderUpdateDto } from '../dto/order-update.dto';
@@ -29,5 +29,10 @@ export class WarehouseController {
     @Body() orderStatus: OrderUpdateDto,
   ) {
     return this.warehouseService.updateOrderStatus(clientId, orderStatus);
+  }
+
+  @Get('order/not-delivered')
+  async getNotDeliveredOrders() {
+    return this.warehouseService.getUndeliverableOrders()
   }
 }

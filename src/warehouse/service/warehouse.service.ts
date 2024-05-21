@@ -1,12 +1,12 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import { WarehouseRepository } from '../repository/warehouse.repository';
-import { OrderResponseDto } from '../dto/order-reponse.dto';
-import { PickingRepository } from '../../picking/repository/picking.repository';
-import { ProductToPickDto } from '../dto/product-to-pick.dto';
-import { ProductWarehouseDto } from '../dto/product-warehouse.dto';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import { OrderUpdateDto } from '../dto/order-update.dto';
+import { ConflictException, Inject, Injectable } from "@nestjs/common";
+import { WarehouseRepository } from "../repository/warehouse.repository";
+import { OrderResponseDto } from "../dto/order-reponse.dto";
+import { PickingRepository } from "../../picking/repository/picking.repository";
+import { ProductToPickDto } from "../dto/product-to-pick.dto";
+import { ProductWarehouseDto } from "../dto/product-warehouse.dto";
+import { HttpService } from "@nestjs/axios";
+import { firstValueFrom } from "rxjs";
+import { OrderUpdateDto } from "../dto/order-update.dto";
 
 @Injectable()
 export class WarehouseService {
@@ -92,5 +92,9 @@ export class WarehouseService {
         orderUpdate,
       ),
     );
+  }
+
+  async getUndeliverableOrders(){
+    return this.warehouseRepository.getUndeliverableOrders();
   }
 }
