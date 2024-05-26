@@ -17,5 +17,20 @@ services:
       interval: 1s
       timeout: 5s
       retries: 10
+
+  api:
+    container_name: "wms-api"
+    depends_on:
+      - database
+    links:
+      - database
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./src:/app/src
+    ports:
+      - '3001:3001'
+      
 volumes:
   db-data:
