@@ -5,10 +5,26 @@ import { WarehouseService } from './service/warehouse.service';
 import { WarehouseRepository } from './repository/warehouse.repository';
 import { PickingRepository } from '../picking/repository/picking.repository';
 import { HttpModule } from '@nestjs/axios';
+import { IWarehouseService } from './service/warehouse.service.interface';
+import { IWarehouseRepository } from './repository/warehouse.repository.interface';
+import { PickingRepositoryProvider } from 'src/picking/picking.module';
+
+export const warehouseServiceProvider = {
+  provide: IWarehouseService,
+  useClass: WarehouseService,
+}
+
+export const warehouseRepositoryProvider = {
+  provide: IWarehouseRepository,
+  useClass: WarehouseRepository,
+}
 
 @Module({
   imports: [PrismaModule, HttpModule],
   controllers: [WarehouseController],
-  providers: [WarehouseService, WarehouseRepository, PickingRepository],
+  providers: [
+    warehouseServiceProvider, 
+    warehouseRepositoryProvider,
+    PickingRepositoryProvider],
 })
-export class WarehouseModule {}
+export class WarehouseModule { }

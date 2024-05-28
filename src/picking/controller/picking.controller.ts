@@ -1,16 +1,18 @@
 import { Body, Controller, HttpCode, Inject, Param, ParseIntPipe, Put } from "@nestjs/common";
 import { ProductPicked } from "../dto/product-picked";
-import { PickingService } from "../service/picking.service";
+import { ApiTags } from "@nestjs/swagger";
+import { IPickingService } from "../service/picking.service.interface";
 
 @Controller('picking')
-export class PickingController{
-  constructor(@Inject(PickingService) private readonly pickingService: PickingService){
+@ApiTags('Picking')
+export class PickingController {
+  constructor(@Inject(IPickingService) private readonly pickingService: IPickingService) {
 
   }
   @Put('/:orderExecutionId')
   @HttpCode(200)
   async updatePickProduct(@Param('orderExecutionId', ParseIntPipe) orderExecutionId: number,
-                          @Body() productPicked: ProductPicked){
-    return this.pickingService.updatePickProduct(orderExecutionId, productPicked.productWareHouseId)
+    @Body() productPicked: ProductPicked) {
+    return this.pickingService.pickProduct(orderExecutionId, productPicked.productWareHouseId)
   }
 }

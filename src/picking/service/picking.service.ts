@@ -1,12 +1,13 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { PickingRepository } from "../repository/picking.repository";
+import { IPickingRepository } from "../repository/picking.repository.interface";
+import { IPickingService } from "./picking.service.interface";
 
 @Injectable()
-export class PickingService{
-  constructor(@Inject(PickingRepository) private readonly pickingRepository: PickingRepository){}
+export class PickingService implements IPickingService{
+  constructor(@Inject(IPickingRepository) private readonly pickingRepository: IPickingRepository){}
 
-  async updatePickProduct(orderExecutionId: number, productWareHouseId: number){
-    const updated = await this.pickingRepository.updateToPickedProduct(orderExecutionId, productWareHouseId);
+  async pickProduct(orderExecutionId: number, productWareHouseId: number){
+    const updated = await this.pickingRepository.pickProduct(orderExecutionId, productWareHouseId);
     if (!updated){
       throw new NotFoundException(`Product with id 
                                   ${productWareHouseId} not found in order execution

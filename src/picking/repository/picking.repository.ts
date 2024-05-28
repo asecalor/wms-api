@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ProductToPickDto } from '../../warehouse/dto/product-to-pick.dto';
+import { IPickingRepository } from './picking.repository.interface';
 
 @Injectable()
-export class PickingRepository {
+export class PickingRepository implements IPickingRepository{
   constructor(@Inject(PrismaService) private readonly db: PrismaService) {}
 
-  async createPicking(
+  async create(
     orderExecutionId: number,
     productsToPickDto: ProductToPickDto[],
   ) {
@@ -20,7 +21,7 @@ export class PickingRepository {
     });
   }
 
-  async updateToPickedProduct(orderExecutionId: number, productWareHouseId: number) :Promise<boolean> {
+  async pickProduct(orderExecutionId: number, productWareHouseId: number) :Promise<boolean> {
     const picking = await this.db.picking.findFirst({
       where: {
         orderExecutionId: orderExecutionId,

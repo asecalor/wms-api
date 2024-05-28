@@ -5,30 +5,64 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Put
+  Put,
+  Query
 } from "@nestjs/common";
-import { OrderResponseDto } from '../dto/order-reponse.dto';
-import { WarehouseService } from '../service/warehouse.service';
-import { OrderUpdateDto } from '../dto/order-update.dto';
+import { ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { IWarehouseService } from "../service/warehouse.service.interface";
+import { WarehouseDTO } from "../dto/warehouse.dto";
+import { WarehouseInput } from "../input/warehouse.input";
+import { MoveProductInput } from "../input/move-product.input";
+import { OrderUpdateDTO } from "../dto/order-update.dto";
+import { OrderUpdate } from "../input/order-update.input";
+import { Order } from "../input/order.input";
 
 @Controller('warehouse')
+@ApiTags('Warehouse')
 export class WarehouseController {
   constructor(
-    @Inject(WarehouseService)
-    private readonly warehouseService: WarehouseService,
-  ) {}
+    @Inject(IWarehouseService)
+    private readonly warehouseService: IWarehouseService,
+  ) { }
+
+  @Get()
+  @ApiResponse({ status: 200, type: [WarehouseDTO] })
+  @ApiQuery({ name: 'providerId', required: false, type: Number })
+  async getWarehouses(@Query('providerId', new ParseIntPipe({ optional: true })) providerId?: number): Promise<WarehouseDTO[]> {
+    return this.warehouseService.getAllWarehouses(providerId);
+  }
+
+  @Post()
+  @ApiResponse({ status: 201, type: WarehouseDTO })
+  async createWarehouse(@Body() warehouse: WarehouseInput): Promise<WarehouseDTO> {
+    return this.warehouseService.createWarehouse(warehouse);
+  }
+
+  @Get(':id')
+  @ApiResponse({ status: 200, type: WarehouseDTO })
+  async getWarehouseById(@Param('id', ParseIntPipe) id: number): Promise<WarehouseDTO> {
+    return this.warehouseService.getWarehouseById(id);
+  }
+
+  @Post('/move/:productId')
+  async moveProduct(
+    @Param('productId', ParseIntPipe) productId: number,
+    @Body() warehouse: MoveProductInput,
+  ) {
+    return this.warehouseService.moveProduct(productId, warehouse);
+  }
 
   @Post('order')
-  async handleOrder(@Body() order: OrderResponseDto) {
+  async handleOrder(@Body() order: Order) {
     await this.warehouseService.handleOrder(order);
   }
 
   @Put('order/:orderId')
   async updateOrderStatus(
     @Param('orderId', ParseIntPipe) clientId: number,
-    @Body() orderStatus: OrderUpdateDto,
+    @Body() orderStatus: OrderUpdate,
   ) {
-    return this.warehouseService.updateOrderStatus(clientId, orderStatus);
+    return this.warehouseService.updateOrderStatus(clientId, orderStatus.status);
   }
 
   @Get('not-delivered-orders')
