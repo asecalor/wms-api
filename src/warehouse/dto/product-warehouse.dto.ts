@@ -1,18 +1,19 @@
-export class ProductWarehouseDto {
-  readonly productWarehouseId: number;
-  readonly warehouseId: number;
+import { ApiProperty } from "@nestjs/swagger";
+
+export class ProductWarehouseDTO {
+
+  @ApiProperty()
+  readonly wareHouseId: number;
+
+  @ApiProperty()
   readonly productId: number;
+
+  @ApiProperty()
   readonly stock: number;
 
-  constructor(
-    productWarehouseId: number,
-    warehouseId: number,
-    productId: number,
-    stock: number,
-  ) {
-    this.productWarehouseId = productWarehouseId;
-    this.warehouseId = warehouseId;
-    this.productId = productId;
-    this.stock = stock;
+  constructor(product: ProductWarehouseDTO) {
+    this.wareHouseId = product.wareHouseId;
+    this.productId = product.productId;
+    this.stock = product.stock;
   }
 }
