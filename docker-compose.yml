@@ -12,6 +12,8 @@ services:
       POSTGRES_DB: ${DATABASE_NAME}
     volumes:
       - db-data:/var/lib/postgresql/data
+    networks:
+      - wms-api
     healthcheck:
       test: "CMD-SHELL pg_isready -d $$POSTGRES_DB"
       interval: 1s
@@ -31,6 +33,16 @@ services:
       - ./src:/app/src
     ports:
       - '3001:3001'
+    networks:
+      - wms-api
+      - aseca-environment
       
 volumes:
   db-data:
+
+networks:
+  wms-api:
+    name: wms-api
+    driver: bridge
+  aseca-environment:
+    external: true
