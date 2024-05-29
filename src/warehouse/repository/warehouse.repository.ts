@@ -56,10 +56,16 @@ export class WarehouseRepository implements IWarehouseRepository {
   }
 
   async moveProduct(productId: number, fromWarehouseId: number, toWarehouseId: number, quantity: number): Promise<void> {
+    const productWareHouseFrom = await this.db.productWareHouse.findFirst({
+      where: {
+        productId: productId,
+        wareHouseId: fromWarehouseId,
+      }
+    })
+
     await this.db.productWareHouse.update({
       where: {
-        id: fromWarehouseId,
-        productId: productId,
+        id: productWareHouseFrom.id,
       },
       data: {
         stock: {
@@ -85,11 +91,10 @@ export class WarehouseRepository implements IWarehouseRepository {
       })
     }
     else {
-    // else update the stock
+      // else update the stock
       await this.db.productWareHouse.update({
         where: {
-          id: toWarehouseId,
-          productId: productId,
+          id: productWareHouseDestination.id
         },
         data: {
           stock: {
