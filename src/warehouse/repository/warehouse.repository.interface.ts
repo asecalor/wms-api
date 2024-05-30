@@ -14,6 +14,6 @@ export abstract class IWarehouseRepository {
     abstract existsOrderRejected(orderId: number): Promise<boolean>;
     abstract createOrderExecution(orderId: number): Promise<any>;
     abstract createOrderRejection(orderId: number): Promise<any>;
-    abstract updateStock(productWarehouseId: number, quantity: number): Promise<void>;
+    abstract updateStock(warehouseId:number,productId:number,stock: number): Promise<void>;
     abstract getUndeliverableOrders(): Promise<any>;
 }

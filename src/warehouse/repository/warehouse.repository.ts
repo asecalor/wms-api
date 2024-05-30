@@ -152,15 +152,16 @@ export class WarehouseRepository implements IWarehouseRepository {
     });
   }
 
-  async updateStock(productWareHouseId: number, quantity: number) {
-    this.db.productWareHouse.update({
+  async updateStock(warehouseId:number,productId:number,stock: number) {
+    await this.db.productWareHouse.update({
       where: {
-        id: productWareHouseId,
+       wareHouseId_productId: {
+            wareHouseId: warehouseId,
+            productId: productId,
+          },
       },
       data: {
-        stock: {
-          decrement: quantity,
-        },
+        stock
       },
     });
   }

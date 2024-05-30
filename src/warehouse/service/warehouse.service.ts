@@ -121,9 +121,11 @@ export class WarehouseService implements IWarehouseService {
           productOrder.quantity,
         ),
       );
+      const newStock= wareHouseWithStockOfProduct.stock-productOrder.quantity
       await this.warehouseRepository.updateStock(
+        wareHouseWithStockOfProduct.wareHouseId,
         wareHouseWithStockOfProduct.productId,
-        productOrder.quantity,
+        newStock
       );
     }
     return productsToPick;
