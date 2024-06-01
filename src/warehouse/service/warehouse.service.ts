@@ -97,7 +97,11 @@ export class WarehouseService implements IWarehouseService {
       productWarehouses,
     );
     await this.pickingRepository.create(order.id, productsToPick);
-    await this.updateOrderStatus(order.id, OrderStatus.ACCEPTED);
+    await firstValueFrom(
+      this.httpService.put(`http://control-tower-api:3000/order/${order.id}`, {
+        status: OrderStatus.ACCEPTED,
+      }),
+    );
   }
 
   private async checkOrderExists(order: Order) {
@@ -156,7 +160,7 @@ export class WarehouseService implements IWarehouseService {
     const canDeliver = notDeliveredOrderDTOS.find(
       (order) => order.orderId === orderId,
     );
-    if (!!canDeliver) {
+    if (canDeliver) {
       const productIds = canDeliver.products
         .map((product) => `productWareHouseId: ${product.productWareHouseId}`)
         .join(', ');
