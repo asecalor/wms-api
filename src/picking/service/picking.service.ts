@@ -9,15 +9,15 @@ export class PickingService implements IPickingService {
     private readonly pickingRepository: IPickingRepository,
   ) {}
 
-  async pickProduct(orderExecutionId: number, productWareHouseId: number) {
+  async pickProduct(orderId: number, productWareHouseId: number) {
     const updated = await this.pickingRepository.pickProduct(
-      orderExecutionId,
+      orderId,
       productWareHouseId,
     );
     if (!updated) {
       throw new NotFoundException(`Product with id 
-                                  ${productWareHouseId} not found in order execution
-                                  ${orderExecutionId}`);
+                                  ${productWareHouseId} not found in order 
+                                  ${orderId}`);
     }
   }
 }

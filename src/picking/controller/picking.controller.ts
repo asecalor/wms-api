@@ -17,14 +17,14 @@ export class PickingController {
   constructor(
     @Inject(IPickingService) private readonly pickingService: IPickingService,
   ) {}
-  @Put('/:orderExecutionId')
+  @Put('/:orderId')
   @HttpCode(200)
   async updatePickProduct(
-    @Param('orderExecutionId', ParseIntPipe) orderExecutionId: number,
+    @Param('orderId', ParseIntPipe) orderId: number,
     @Body() productPicked: ProductPicked,
   ) {
     return this.pickingService.pickProduct(
-      orderExecutionId,
+      orderId,
       productPicked.productWareHouseId,
     );
   }

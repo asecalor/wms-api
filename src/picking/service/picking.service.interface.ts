@@ -1,6 +1,6 @@
 export abstract class IPickingService {
   abstract pickProduct(
-    orderExecutionId: number,
+    orderId: number,
     productWareHouseId: number,
   ): Promise<void>;
 }
