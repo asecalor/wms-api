@@ -15,9 +15,7 @@ export class PickingService implements IPickingService {
       productWareHouseId,
     );
     if (!updated) {
-      throw new NotFoundException(`Product with id 
-                                  ${productWareHouseId} not found in order 
-                                  ${orderId}`);
+      throw new NotFoundException(`Product of warehouse with id ${productWareHouseId} not found in order ${orderId}`);
     }
   }
 }
