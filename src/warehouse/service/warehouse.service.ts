@@ -157,11 +157,11 @@ export class WarehouseService implements IWarehouseService {
 
   async updateOrderStatus(orderId: number, status: string): Promise<void> {
     const notDeliveredOrderDTOS = await this.getUndeliverableOrders();
-    const canDeliver = notDeliveredOrderDTOS.find(
+    const isUndeliverableOrder = notDeliveredOrderDTOS.find(
       (order) => order.orderId === orderId,
     );
-    if (canDeliver) {
-      const productIds = canDeliver.products
+    if (isUndeliverableOrder) {
+      const productIds = isUndeliverableOrder.products
         .map((product) => `productWareHouseId: ${product.productWareHouseId}`)
         .join(', ');
       throw new ConflictException(
