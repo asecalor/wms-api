@@ -7,16 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model OrderExecution {
-  id         Int       @id @default(autoincrement())
-  orderId    Int       @unique
-  canDeliver Boolean   @default(false)
-  picking    Picking[]
-}
-
 model OrderRejection {
-  id        Int      @id @default(autoincrement())
-  orderId   Int      @unique
+  orderId   Int      @id @unique
   createdAt DateTime @default(now())
 }
 
@@ -40,10 +32,11 @@ model ProductWareHouse {
 
 model Picking {
   id                 Int              @id @default(autoincrement())
-  orderExecutionId   Int
+  orderId            Int
   productWareHouseId Int
   quantity           Int // Items of the order
   picked             Boolean          @default(false)
   ProductWareHouse   ProductWareHouse @relation(fields: [productWareHouseId], references: [id])
-  OrderExecution     OrderExecution   @relation(fields: [orderExecutionId], references: [id])
+
+  @@unique([orderId, productWareHouseId])
 }

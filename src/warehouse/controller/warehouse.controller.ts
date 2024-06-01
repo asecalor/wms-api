@@ -1,21 +1,23 @@
 import {
   Body,
-  Controller, Get,
+  Controller,
+  Get,
   Inject,
   Param,
   ParseIntPipe,
   Post,
   Put,
-  Query
-} from "@nestjs/common";
-import { ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { IWarehouseService } from "../service/warehouse.service.interface";
-import { WarehouseDTO } from "../dto/warehouse.dto";
-import { WarehouseInput } from "../input/warehouse.input";
-import { MoveProductInput } from "../input/move-product.input";
-import { OrderUpdateDTO } from "../dto/order-update.dto";
-import { OrderUpdate } from "../input/order-update.input";
-import { Order } from "../input/order.input";
+  Query,
+} from '@nestjs/common';
+import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { IWarehouseService } from '../service/warehouse.service.interface';
+import { WarehouseDTO } from '../dto/warehouse.dto';
+import { WarehouseInput } from '../input/warehouse.input';
+import { MoveProductInput } from '../input/move-product.input';
+import { OrderUpdateDTO } from '../dto/order-update.dto';
+import { OrderUpdate } from '../input/order-update.input';
+import { Order } from '../input/order.input';
+import { NotDeliveredOrderDTO } from '../dto/not-delivered-order.dto';
 
 @Controller('warehouse')
 @ApiTags('Warehouse')
@@ -23,24 +25,31 @@ export class WarehouseController {
   constructor(
     @Inject(IWarehouseService)
     private readonly warehouseService: IWarehouseService,
-  ) { }
+  ) {}
 
   @Get()
   @ApiResponse({ status: 200, type: [WarehouseDTO] })
   @ApiQuery({ name: 'providerId', required: false, type: Number })
-  async getWarehouses(@Query('providerId', new ParseIntPipe({ optional: true })) providerId?: number): Promise<WarehouseDTO[]> {
+  async getWarehouses(
+    @Query('providerId', new ParseIntPipe({ optional: true }))
+    providerId?: number,
+  ): Promise<WarehouseDTO[]> {
     return this.warehouseService.getAllWarehouses(providerId);
   }
 
   @Post()
   @ApiResponse({ status: 201, type: WarehouseDTO })
-  async createWarehouse(@Body() warehouse: WarehouseInput): Promise<WarehouseDTO> {
+  async createWarehouse(
+    @Body() warehouse: WarehouseInput,
+  ): Promise<WarehouseDTO> {
     return this.warehouseService.createWarehouse(warehouse);
   }
 
   @Get(':id')
   @ApiResponse({ status: 200, type: WarehouseDTO })
-  async getWarehouseById(@Param('id', ParseIntPipe) id: number): Promise<WarehouseDTO> {
+  async getWarehouseById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<WarehouseDTO> {
     return this.warehouseService.getWarehouseById(id);
   }
 
@@ -62,11 +71,15 @@ export class WarehouseController {
     @Param('orderId', ParseIntPipe) clientId: number,
     @Body() orderStatus: OrderUpdate,
   ) {
-    return this.warehouseService.updateOrderStatus(clientId, orderStatus.status);
+    return this.warehouseService.updateOrderStatus(
+      clientId,
+      orderStatus.status,
+    );
   }
 
-  @Get('not-delivered-orders')
+  @Get('order/not-delivered-orders')
+  @ApiResponse({ status: 200, type: [NotDeliveredOrderDTO] })
   async getNotDeliveredOrders() {
-    return this.warehouseService.getUndeliverableOrders()
+    return this.warehouseService.getUndeliverableOrders();
   }
 }

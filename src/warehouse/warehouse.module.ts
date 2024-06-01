@@ -12,19 +12,20 @@ import { PickingRepositoryProvider } from 'src/picking/picking.module';
 export const warehouseServiceProvider = {
   provide: IWarehouseService,
   useClass: WarehouseService,
-}
+};
 
 export const warehouseRepositoryProvider = {
   provide: IWarehouseRepository,
   useClass: WarehouseRepository,
-}
+};
 
 @Module({
   imports: [PrismaModule, HttpModule],
   controllers: [WarehouseController],
   providers: [
-    warehouseServiceProvider, 
+    warehouseServiceProvider,
     warehouseRepositoryProvider,
-    PickingRepositoryProvider],
+    PickingRepositoryProvider,
+  ],
 })
-export class WarehouseModule { }
+export class WarehouseModule {}

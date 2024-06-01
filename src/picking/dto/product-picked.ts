@@ -1,6 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
-export class ProductPicked{
+export class ProductPicked {
   @ApiProperty()
   readonly productWareHouseId: number;
 
