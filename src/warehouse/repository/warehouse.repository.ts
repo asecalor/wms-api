@@ -1,20 +1,22 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { PrismaService } from "../../prisma/prisma.service";
-import { WarehouseDTO } from "../dto/warehouse.dto";
-import { IWarehouseRepository } from "./warehouse.repository.interface";
-import { WarehouseInput } from "../input/warehouse.input";
-import { ProductWarehouseDTO } from "../dto/product-warehouse.dto";
+import { Inject, Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { WarehouseDTO } from '../dto/warehouse.dto';
+import { IWarehouseRepository } from './warehouse.repository.interface';
+import { WarehouseInput } from '../input/warehouse.input';
+import { ProductWarehouseDTO } from '../dto/product-warehouse.dto';
+import { NotDeliveredOrderDTO } from '../dto/not-delivered-order.dto';
+import { ProductDTO } from '../dto/product.dto';
 
 @Injectable()
 export class WarehouseRepository implements IWarehouseRepository {
-  constructor(@Inject(PrismaService) private readonly db: PrismaService) { }
+  constructor(@Inject(PrismaService) private readonly db: PrismaService) {}
 
   async create(warehouse: WarehouseInput): Promise<WarehouseDTO> {
     const newWarehouse = await this.db.wareHouse.create({
       data: warehouse,
       include: {
         products: true,
-      }
+      },
     });
     return new WarehouseDTO(newWarehouse);
   }
@@ -23,9 +25,9 @@ export class WarehouseRepository implements IWarehouseRepository {
     const warehouses = await this.db.wareHouse.findMany({
       include: {
         products: true,
-      }
+      },
     });
-    return warehouses.map(warehouse => new WarehouseDTO(warehouse));
+    return warehouses.map((warehouse) => new WarehouseDTO(warehouse));
   }
 
   async findById(id: number): Promise<WarehouseDTO> {
@@ -35,7 +37,7 @@ export class WarehouseRepository implements IWarehouseRepository {
       },
       include: {
         products: true,
-      }
+      },
     });
     if (!warehouse) {
       return null;
@@ -50,18 +52,23 @@ export class WarehouseRepository implements IWarehouseRepository {
       },
       include: {
         products: true,
-      }
+      },
     });
-    return warehouses?.map(warehouse => new WarehouseDTO(warehouse));
+    return warehouses?.map((warehouse) => new WarehouseDTO(warehouse));
   }
 
-  async moveProduct(productId: number, fromWarehouseId: number, toWarehouseId: number, quantity: number): Promise<void> {
+  async moveProduct(
+    productId: number,
+    fromWarehouseId: number,
+    toWarehouseId: number,
+    quantity: number,
+  ): Promise<void> {
     const productWareHouseFrom = await this.db.productWareHouse.findFirst({
       where: {
         productId: productId,
         wareHouseId: fromWarehouseId,
-      }
-    })
+      },
+    });
 
     await this.db.productWareHouse.update({
       where: {
@@ -71,15 +78,16 @@ export class WarehouseRepository implements IWarehouseRepository {
         stock: {
           decrement: quantity,
         },
-      }
-    })
+      },
+    });
 
-    const productWareHouseDestination = await this.db.productWareHouse.findFirst({
-      where: {
-        productId: productId,
-        wareHouseId: toWarehouseId,
-      }
-    })
+    const productWareHouseDestination =
+      await this.db.productWareHouse.findFirst({
+        where: {
+          productId: productId,
+          wareHouseId: toWarehouseId,
+        },
+      });
     // If the product is not in the destination warehouse, create it
     if (!productWareHouseDestination) {
       await this.db.productWareHouse.create({
@@ -87,21 +95,20 @@ export class WarehouseRepository implements IWarehouseRepository {
           productId: productId,
           wareHouseId: toWarehouseId,
           stock: quantity,
-        }
-      })
-    }
-    else {
+        },
+      });
+    } else {
       // else update the stock
       await this.db.productWareHouse.update({
         where: {
-          id: productWareHouseDestination.id
+          id: productWareHouseDestination.id,
         },
         data: {
           stock: {
             increment: quantity,
           },
-        }
-      })
+        },
+      });
     }
   }
 
@@ -122,17 +129,8 @@ export class WarehouseRepository implements IWarehouseRepository {
       },
     });
     return wareHouseProduct.map(
-      (wareHouseProduct) =>
-        new ProductWarehouseDTO(wareHouseProduct),
+      (wareHouseProduct) => new ProductWarehouseDTO(wareHouseProduct),
     );
-  }
-  async existsOrderExecuted(orderId: number): Promise<boolean> {
-    const order = await this.db.orderExecution.findUnique({
-      where: {
-        orderId,
-      },
-    });
-    return !!order;
   }
 
   async existsOrderRejected(orderId: number): Promise<boolean> {
@@ -144,24 +142,16 @@ export class WarehouseRepository implements IWarehouseRepository {
     return !!order;
   }
 
-  async createOrderExecution(orderId: number) {
-    return this.db.orderExecution.create({
-      data: {
-        orderId,
-      },
-    });
-  }
-
-  async updateStock(warehouseId:number,productId:number,stock: number) {
+  async updateStock(warehouseId: number, productId: number, stock: number) {
     await this.db.productWareHouse.update({
       where: {
-       wareHouseId_productId: {
-            wareHouseId: warehouseId,
-            productId: productId,
-          },
+        wareHouseId_productId: {
+          wareHouseId: warehouseId,
+          productId: productId,
+        },
       },
       data: {
-        stock
+        stock,
       },
     });
   }
@@ -174,23 +164,33 @@ export class WarehouseRepository implements IWarehouseRepository {
     });
   }
 
-  async getUndeliverableOrders() {
+  async getUndeliverableOrders(): Promise<NotDeliveredOrderDTO[]> {
     //Finds all orders that can't be delivered
-    return this.db.orderExecution.findMany({
+    const orders = await this.db.picking.findMany({
       where: {
-        canDeliver: false,
+        picked: false,
       },
       select: {
-        id: true,
         orderId: true,
-        picking: {
-          select: {
-            productWareHouseId: true,
-            quantity: true,
-            picked: true,
-          },
-        },
+        productWareHouseId: true,
+        quantity: true,
+        picked: true,
       },
+      orderBy: {
+        orderId: 'asc',
+      },
+    });
+    const groupedOrders: { [key: string]: ProductDTO[] } = {};
+
+    orders.forEach((order) => {
+      if (!groupedOrders[order.orderId]) {
+        groupedOrders[order.orderId] = [];
+      }
+      groupedOrders[order.orderId].push(new ProductDTO(order));
+    });
+
+    return Object.entries(groupedOrders).map(([orderId, products]) => {
+      return new NotDeliveredOrderDTO(parseInt(orderId), products);
     });
   }
 }

@@ -9,19 +9,16 @@ import { PickingController } from './controller/picking.controller';
 export const PickingRepositoryProvider = {
   provide: IPickingRepository,
   useClass: PickingRepository,
-}
+};
 
 export const PickingServiceProvider = {
   provide: IPickingService,
   useClass: PickingService,
-}
+};
 
 @Module({
   imports: [PrismaModule],
   controllers: [PickingController],
-  providers: [
-    PickingRepositoryProvider,
-    PickingServiceProvider,
-  ],
+  providers: [PickingRepositoryProvider, PickingServiceProvider],
 })
 export class PickingModule {}

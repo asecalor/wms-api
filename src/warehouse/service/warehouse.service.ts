@@ -1,26 +1,34 @@
-import { ConflictException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { ProductToPickDto } from "../dto/product-to-pick.dto";
-import { HttpService } from "@nestjs/axios";
-import { firstValueFrom } from "rxjs";
-import { Order } from "../input/order.input";
-import { IWarehouseService } from "./warehouse.service.interface";
-import { IWarehouseRepository } from "../repository/warehouse.repository.interface";
-import { WarehouseDTO } from "../dto/warehouse.dto";
-import { WarehouseInput } from "../input/warehouse.input";
-import { MoveProductInput } from "../input/move-product.input";
-import { IPickingRepository } from "src/picking/repository/picking.repository.interface";
-import { OrderUpdateDTO } from "../dto/order-update.dto";
-import { OrderStatus } from "../model";
-import { ProductWarehouseDTO } from "../dto/product-warehouse.dto";
-
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ProductToPickDto } from '../dto/product-to-pick.dto';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { Order } from '../input/order.input';
+import { IWarehouseService } from './warehouse.service.interface';
+import { IWarehouseRepository } from '../repository/warehouse.repository.interface';
+import { WarehouseDTO } from '../dto/warehouse.dto';
+import { WarehouseInput } from '../input/warehouse.input';
+import { MoveProductInput } from '../input/move-product.input';
+import { IPickingRepository } from 'src/picking/repository/picking.repository.interface';
+import { OrderUpdateDTO } from '../dto/order-update.dto';
+import { OrderStatus } from '../model';
+import { ProductWarehouseDTO } from '../dto/product-warehouse.dto';
+import { NotDeliveredOrderDTO } from '../dto/not-delivered-order.dto';
 
 @Injectable()
 export class WarehouseService implements IWarehouseService {
   constructor(
-    @Inject(IWarehouseRepository) private readonly warehouseRepository: IWarehouseRepository,
-    @Inject(IPickingRepository) private readonly pickingRepository: IPickingRepository,
+    @Inject(IWarehouseRepository)
+    private readonly warehouseRepository: IWarehouseRepository,
+    @Inject(IPickingRepository)
+    private readonly pickingRepository: IPickingRepository,
     private readonly httpService: HttpService,
-  ) { }
+  ) {}
 
   async createWarehouse(warehouse: WarehouseInput): Promise<WarehouseDTO> {
     return await this.warehouseRepository.create(warehouse);
@@ -43,19 +51,29 @@ export class WarehouseService implements IWarehouseService {
 
   async moveProduct(productId: number, move: MoveProductInput): Promise<void> {
     const { providerId, fromWarehouseId, toWarehouseId, quantity } = move;
-    const fromWarehouse = await this.warehouseRepository.findById(fromWarehouseId);
+    const fromWarehouse =
+      await this.warehouseRepository.findById(fromWarehouseId);
     const toWarehouse = await this.warehouseRepository.findById(toWarehouseId);
 
     if (!fromWarehouse || !toWarehouse) {
       throw new NotFoundException(`Warehouse not found`);
     }
-    if (fromWarehouse.providerId !== providerId || toWarehouse.providerId !== providerId) {
-      throw new UnauthorizedException(`Warehouses must belong to the same provider`);
+    if (
+      fromWarehouse.providerId !== providerId ||
+      toWarehouse.providerId !== providerId
+    ) {
+      throw new UnauthorizedException(
+        `Warehouses must belong to the same provider`,
+      );
     }
     if (fromWarehouse.providerId !== toWarehouse.providerId) {
-      throw new UnauthorizedException(`Warehouses must belong to the same provider`);
+      throw new UnauthorizedException(
+        `Warehouses must belong to the same provider`,
+      );
     }
-    const products = fromWarehouse.products.find(p => p.productId === productId);
+    const products = fromWarehouse.products.find(
+      (p) => p.productId === productId,
+    );
     if (!products) {
       throw new NotFoundException(`Product not found in warehouse`);
     }
@@ -63,7 +81,12 @@ export class WarehouseService implements IWarehouseService {
       throw new ConflictException(`Insufficient stock in warehouse`);
     }
 
-    await this.warehouseRepository.moveProduct(productId, fromWarehouseId, toWarehouseId, quantity);
+    await this.warehouseRepository.moveProduct(
+      productId,
+      fromWarehouseId,
+      toWarehouseId,
+      quantity,
+    );
     return;
   }
   async handleOrder(order: Order) {
@@ -73,17 +96,17 @@ export class WarehouseService implements IWarehouseService {
       order,
       productWarehouses,
     );
-    const orderExecution = await this.createOrderExecution(order);
-    await this.pickingRepository.create(
-      orderExecution.id,
-      productsToPick,
+    await this.pickingRepository.create(order.id, productsToPick);
+    await firstValueFrom(
+      this.httpService.put(`http://control-tower-api:3000/order/${order.id}`, {
+        status: OrderStatus.ACCEPTED,
+      }),
     );
-    await this.updateOrderStatus(order.id, OrderStatus.ACCEPTED);
   }
 
   private async checkOrderExists(order: Order) {
     const orderAlreadyExists =
-      (await this.warehouseRepository.existsOrderExecuted(order.id)) ||
+      (await this.pickingRepository.existsOrder(order.id)) ||
       (await this.warehouseRepository.existsOrderRejected(order.id));
     if (orderAlreadyExists) {
       throw new ConflictException('Order was already managed');
@@ -121,32 +144,38 @@ export class WarehouseService implements IWarehouseService {
           productOrder.quantity,
         ),
       );
-      const newStock= wareHouseWithStockOfProduct.stock-productOrder.quantity
+      const newStock =
+        wareHouseWithStockOfProduct.stock - productOrder.quantity;
       await this.warehouseRepository.updateStock(
         wareHouseWithStockOfProduct.wareHouseId,
         wareHouseWithStockOfProduct.productId,
-        newStock
+        newStock,
       );
     }
     return productsToPick;
   }
 
-  private async createOrderExecution(order: Order) {
-    return await this.warehouseRepository.createOrderExecution(order.id);
-  }
-
   async updateOrderStatus(orderId: number, status: string): Promise<void> {
+    const notDeliveredOrderDTOS = await this.getUndeliverableOrders();
+    const isUndeliverableOrder = notDeliveredOrderDTOS.find(
+      (order) => order.orderId === orderId,
+    );
+    if (isUndeliverableOrder) {
+      const productIds = isUndeliverableOrder.products
+        .map((product) => `productWareHouseId: ${product.productWareHouseId}`)
+        .join(', ');
+      throw new ConflictException(
+        `Order cannot be delivered, the following products are not picked: ${productIds}`,
+      );
+    }
     await firstValueFrom(
-      this.httpService.put(
-        `http://control-tower-api:3000/order/${orderId}`,
-        {
-          status,
-        },
-      ),
+      this.httpService.put(`http://control-tower-api:3000/order/${orderId}`, {
+        status,
+      }),
     );
   }
 
-  async getUndeliverableOrders(){
+  async getUndeliverableOrders(): Promise<NotDeliveredOrderDTO[]> {
     return this.warehouseRepository.getUndeliverableOrders();
   }
 }
