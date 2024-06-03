@@ -8,6 +8,7 @@ import { HttpModule } from '@nestjs/axios';
 import { IWarehouseService } from './service/warehouse.service.interface';
 import { IWarehouseRepository } from './repository/warehouse.repository.interface';
 import { PickingRepositoryProvider } from 'src/picking/picking.module';
+import { ConfigModule } from "@nestjs/config";
 
 export const warehouseServiceProvider = {
   provide: IWarehouseService,
@@ -20,7 +21,7 @@ export const warehouseRepositoryProvider = {
 };
 
 @Module({
-  imports: [PrismaModule, HttpModule],
+  imports: [PrismaModule, HttpModule, ConfigModule],
   controllers: [WarehouseController],
   providers: [
     warehouseServiceProvider,
