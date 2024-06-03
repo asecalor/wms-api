@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { PickingService } from "../../../src/picking/service/picking.service";
 import { IPickingRepository } from "../../../src/picking/repository/picking.repository.interface";
 import { NotFoundException } from '@nestjs/common';
+import { ConfigModule } from "@nestjs/config";
 
 describe('PickingService', () => {
   let service: PickingService;
@@ -10,9 +11,14 @@ describe('PickingService', () => {
   beforeEach(async () => {
     const pickingRepositoryMock = {
       pickProduct: jest.fn(),
+      existsOrder: jest.fn(),
+      create: jest.fn(),
     };
 
     const moduleRef = await Test.createTestingModule({
+      imports: [ConfigModule.forRoot({
+        envFilePath: '.env',
+      })],
       providers: [
         PickingService,
         { provide: IPickingRepository, useValue: pickingRepositoryMock },

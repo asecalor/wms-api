@@ -12,6 +12,7 @@ import { ProductOrderDTO } from "../../../src/warehouse/dto/product-order.dto";
 import { ProductWarehouseDTO } from "../../../src/warehouse/dto/product-warehouse.dto";
 import { ProductToPickDto } from "../../../src/warehouse/dto/product-to-pick.dto";
 import { of } from "rxjs";
+import { ConfigModule } from "@nestjs/config";
 
 describe('WarehouseService', () => {
   let service: WarehouseService;
@@ -28,14 +29,18 @@ describe('WarehouseService', () => {
       getProductWarehouseByProviderId: jest.fn(),
     };
     const pickingRepositoryMock = {
-      create: jest.fn(),
+      pickProduct: jest.fn(),
       existsOrder: jest.fn(),
+      create: jest.fn(),
     };
     const httpServiceMock = {
       put: jest.fn().mockReturnValue(of({})),
     };
 
     const moduleRef = await Test.createTestingModule({
+      imports: [ConfigModule.forRoot({
+        envFilePath: '.env',
+      })],
       providers: [
         WarehouseService,
         { provide: IWarehouseRepository, useValue: warehouseRepositoryMock },
