@@ -19,16 +19,21 @@ import { OrderUpdateDTO } from '../dto/order-update.dto';
 import { OrderStatus } from '../model';
 import { ProductWarehouseDTO } from '../dto/product-warehouse.dto';
 import { NotDeliveredOrderDTO } from '../dto/not-delivered-order.dto';
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class WarehouseService implements IWarehouseService {
+  private readonly controlTowerUrl: string;
   constructor(
     @Inject(IWarehouseRepository)
     private readonly warehouseRepository: IWarehouseRepository,
     @Inject(IPickingRepository)
     private readonly pickingRepository: IPickingRepository,
     private readonly httpService: HttpService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.controlTowerUrl = this.configService.get<string>('CONTROL_TOWER_URL');
+  }
 
   async createWarehouse(warehouse: WarehouseInput): Promise<WarehouseDTO> {
     return await this.warehouseRepository.create(warehouse);
@@ -98,7 +103,7 @@ export class WarehouseService implements IWarehouseService {
     );
     await this.pickingRepository.create(order.id, productsToPick);
     await firstValueFrom(
-      this.httpService.put(`http://control-tower-api:3000/order/${order.id}`, {
+      this.httpService.put(`${this.controlTowerUrl}/order/${order.id}`, {
         status: OrderStatus.ACCEPTED,
       }),
     );
@@ -169,7 +174,7 @@ export class WarehouseService implements IWarehouseService {
       );
     }
     await firstValueFrom(
-      this.httpService.put(`http://control-tower-api:3000/order/${orderId}`, {
+      this.httpService.put(`${this.controlTowerUrl}/order/${orderId}`, {
         status,
       }),
     );
