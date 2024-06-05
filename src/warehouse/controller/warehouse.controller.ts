@@ -18,6 +18,7 @@ import { OrderUpdateDTO } from '../dto/order-update.dto';
 import { OrderUpdate } from '../input/order-update.input';
 import { Order } from '../input/order.input';
 import { NotDeliveredOrderDTO } from '../dto/not-delivered-order.dto';
+import { AddProduct } from '../input/add-product';
 
 @Controller('warehouse')
 @ApiTags('Warehouse')
@@ -81,9 +82,9 @@ export class WarehouseController {
   async addProductToWarehouse(
     @Param('warehouseId', ParseIntPipe) warehouseId: number,
     @Param('productId', ParseIntPipe) productId: number,
-    @Body('stock', ParseIntPipe) stock: number,
+    @Body() stockBody: AddProduct,
   ) {
-    return this.warehouseService.addProductToWarehouse(warehouseId, productId, stock);
+    return this.warehouseService.addProductToWarehouse(warehouseId, productId, stockBody.stock);
   }
 
   @Get('order/not-delivered-orders')
