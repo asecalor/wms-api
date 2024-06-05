@@ -78,13 +78,12 @@ export class WarehouseController {
     );
   }
 
-  @Post(':warehouseId/:productId')
+  @Post(':warehouseId')
   async addProductToWarehouse(
     @Param('warehouseId', ParseIntPipe) warehouseId: number,
-    @Param('productId', ParseIntPipe) productId: number,
-    @Body() stockBody: AddProduct,
+    @Body() product: AddProduct,
   ) {
-    return this.warehouseService.addProductToWarehouse(warehouseId, productId, stockBody.stock);
+    return this.warehouseService.addProductToWarehouse(warehouseId, product.productId, product.stock);
   }
 
   @Get('order/not-delivered-orders')

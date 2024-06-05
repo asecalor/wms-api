@@ -7,4 +7,9 @@ export class AddProduct{
     @Min(1)
     @ApiProperty()
     readonly stock: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    @ApiProperty()
+    readonly productId: number;
 }
