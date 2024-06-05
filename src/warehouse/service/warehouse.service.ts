@@ -15,11 +15,11 @@ import { WarehouseDTO } from '../dto/warehouse.dto';
 import { WarehouseInput } from '../input/warehouse.input';
 import { MoveProductInput } from '../input/move-product.input';
 import { IPickingRepository } from 'src/picking/repository/picking.repository.interface';
-import { OrderUpdateDTO } from '../dto/order-update.dto';
 import { OrderStatus } from '../model';
 import { ProductWarehouseDTO } from '../dto/product-warehouse.dto';
 import { NotDeliveredOrderDTO } from '../dto/not-delivered-order.dto';
 import { ConfigService } from "@nestjs/config";
+import { StockGateway } from 'src/socket/socket.gateway';
 
 @Injectable()
 export class WarehouseService implements IWarehouseService {
@@ -31,6 +31,7 @@ export class WarehouseService implements IWarehouseService {
     private readonly pickingRepository: IPickingRepository,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly stockGateway: StockGateway,
   ) {
     this.controlTowerUrl = this.configService.get<string>('CONTROL_TOWER_URL');
   }
@@ -94,6 +95,7 @@ export class WarehouseService implements IWarehouseService {
     );
     return;
   }
+
   async handleOrder(order: Order) {
     await this.checkOrderExists(order);
     const productWarehouses = await this.getProductWarehouses(order);
@@ -149,13 +151,17 @@ export class WarehouseService implements IWarehouseService {
           productOrder.quantity,
         ),
       );
-      const newStock =
-        wareHouseWithStockOfProduct.stock - productOrder.quantity;
-      await this.warehouseRepository.updateStock(
+      const newStock = wareHouseWithStockOfProduct.stock - productOrder.quantity;
+      const updatedProduct = await this.warehouseRepository.updateStock(
         wareHouseWithStockOfProduct.wareHouseId,
         wareHouseWithStockOfProduct.productId,
         newStock,
       );
+
+      if(updatedProduct.stock < 10) {
+        this.stockGateway.emitStockAlert(updatedProduct);
+      }
+      
     }
     return productsToPick;
   }
