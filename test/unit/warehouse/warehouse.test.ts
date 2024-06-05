@@ -13,6 +13,7 @@ import { ProductWarehouseDTO } from "../../../src/warehouse/dto/product-warehous
 import { ProductToPickDto } from "../../../src/warehouse/dto/product-to-pick.dto";
 import { of } from "rxjs";
 import { ConfigModule } from "@nestjs/config";
+import { StockGateway } from "../../../src/socket/socket.gateway";
 
 describe('WarehouseService', () => {
   let service: WarehouseService;
@@ -46,6 +47,7 @@ describe('WarehouseService', () => {
         { provide: IWarehouseRepository, useValue: warehouseRepositoryMock },
         { provide: IPickingRepository, useValue: pickingRepositoryMock },
         { provide: HttpService, useValue: httpServiceMock },
+        StockGateway,
       ],
     }).compile();
 
@@ -154,6 +156,15 @@ describe('WarehouseService', () => {
     pickingRepository.existsOrder.mockResolvedValue(false);
     warehouseRepository.existsOrderRejected.mockResolvedValue(false);
     warehouseRepository.getProductWarehouseByProviderId.mockResolvedValue(warehouses);
+
+    warehouseRepository.
+    updateStock.
+    mockResolvedValue(new ProductWarehouseDTO({ wareHouseId: 1, productId: 1, stock:95 }))
+
+
+    warehouseRepository.
+    updateStock.
+    mockResolvedValue(new ProductWarehouseDTO({ wareHouseId: 1, productId: 2, stock:47 }))
 
     await service.handleOrder(order);
 
