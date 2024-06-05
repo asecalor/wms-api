@@ -25,4 +25,5 @@ export abstract class IWarehouseRepository {
     stock: number,
   ): Promise<void>;
   abstract getUndeliverableOrders(): Promise<NotDeliveredOrderDTO[]>;
+  abstract addProduct(productId: number, warehouseId: number, stock: number): Promise<void>;
 }

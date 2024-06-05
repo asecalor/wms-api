@@ -112,6 +112,16 @@ export class WarehouseRepository implements IWarehouseRepository {
     }
   }
 
+  async addProduct(productId: number, warehouseId: number, stock: number): Promise<void> {
+    await this.db.productWareHouse.create({
+      data:{
+        productId,
+        wareHouseId: warehouseId,
+        stock
+      }
+    })
+  }
+
   async getProductWarehouseByProviderId(
     providerId: number,
   ): Promise<ProductWarehouseDTO[]> {

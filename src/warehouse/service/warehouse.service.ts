@@ -94,6 +94,7 @@ export class WarehouseService implements IWarehouseService {
     );
     return;
   }
+
   async handleOrder(order: Order) {
     await this.checkOrderExists(order);
     const productWarehouses = await this.getProductWarehouses(order);
@@ -107,6 +108,10 @@ export class WarehouseService implements IWarehouseService {
         status: OrderStatus.ACCEPTED,
       }),
     );
+  }
+
+  async addProductToWarehouse(warehouseId: number, productId: number, stock: number): Promise<void> {
+    await this.warehouseRepository.addProduct(productId, warehouseId, stock);
   }
 
   private async checkOrderExists(order: Order) {

@@ -77,6 +77,15 @@ export class WarehouseController {
     );
   }
 
+  @Post(':warehouseId/:productId')
+  async addProductToWarehouse(
+    @Param('warehouseId', ParseIntPipe) warehouseId: number,
+    @Param('productId', ParseIntPipe) productId: number,
+    @Body('stock', ParseIntPipe) stock: number,
+  ) {
+    return this.warehouseService.addProductToWarehouse(warehouseId, productId, stock);
+  }
+
   @Get('order/not-delivered-orders')
   @ApiResponse({ status: 200, type: [NotDeliveredOrderDTO] })
   async getNotDeliveredOrders() {

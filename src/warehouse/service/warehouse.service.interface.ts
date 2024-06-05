@@ -15,6 +15,7 @@ export abstract class IWarehouseService {
   abstract updateOrderStatus(orderId: number, status: string): Promise<void>;
   abstract handleOrder(order: Order): Promise<void>;
   abstract getUndeliverableOrders(): Promise<NotDeliveredOrderDTO[]>;
+  abstract addProductToWarehouse(warehouseId: number,productId: number, stock: number): Promise<void>;
   // abstract updateProductStock(productId: number, stock: number): Promise<void>;
   // abstract updateProductPicked(productWareHouseId: number): Promise<void>;
 }
