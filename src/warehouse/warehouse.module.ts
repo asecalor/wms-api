@@ -9,6 +9,7 @@ import { IWarehouseService } from './service/warehouse.service.interface';
 import { IWarehouseRepository } from './repository/warehouse.repository.interface';
 import { PickingRepositoryProvider } from 'src/picking/picking.module';
 import { ConfigModule } from "@nestjs/config";
+import { SocketModule } from 'src/socket/socket.module';
 
 export const warehouseServiceProvider = {
   provide: IWarehouseService,
@@ -21,7 +22,7 @@ export const warehouseRepositoryProvider = {
 };
 
 @Module({
-  imports: [PrismaModule, HttpModule, ConfigModule],
+  imports: [PrismaModule, HttpModule, ConfigModule, SocketModule],
   controllers: [WarehouseController],
   providers: [
     warehouseServiceProvider,

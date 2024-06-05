@@ -152,8 +152,8 @@ export class WarehouseRepository implements IWarehouseRepository {
     return !!order;
   }
 
-  async updateStock(warehouseId: number, productId: number, stock: number) {
-    await this.db.productWareHouse.update({
+  async updateStock(warehouseId: number, productId: number, stock: number): Promise<ProductWarehouseDTO> {
+    const productWarehouse = await this.db.productWareHouse.update({
       where: {
         wareHouseId_productId: {
           wareHouseId: warehouseId,
@@ -162,8 +162,10 @@ export class WarehouseRepository implements IWarehouseRepository {
       },
       data: {
         stock,
-      },
+      }
     });
+
+    return new ProductWarehouseDTO(productWarehouse);
   }
 
   async createOrderRejection(orderId: number) {
